@@ -168,15 +168,15 @@ unique(methylation_data$chr_state)
 
 #mean and weighted mean when just filtering for pcdg target genes
 
-PCDH_target <- Filtered_methylation_data %>%
-  filter(Annotated_genes %in% c("PCDHGA1","PCDHGA2","PCDHGA3","PCDHGA4","PCDHGB1"))
+PCDH_target <- Gene_Filtered_Methylation_data %>%
+   filter(Annotated_genes %in% c("PCDHGA1","PCDHGA2","PCDHGA3","PCDHGA4","PCDHGB1"))
+
+unique(PCDH_target$Annotated_genes)
+
 nrow(PCDH_target)
-test1 <- PCDH_target %>%
-  filter(Annotated_genes %in% c("island", "N_shore", "S_shore"))
-cat("Rows with island/N_shore/S_shore:", nrow(test1), "\n")
 
 
-Mean_gene_effect <- Gene_Filtered_Methylation_data %>%
+PCDH_by_gene <- PCDH_target %>%
   group_by(Annotated_genes) %>%
   summarise(
     methylation_mean = mean(Effect_size, na.rm = TRUE),
@@ -185,7 +185,3 @@ Mean_gene_effect <- Gene_Filtered_Methylation_data %>%
     Mean_Effect_Size = mean(Effect_size, na.rm = TRUE),
   )
 
-Gene_Filtered_Methylation_data <- Gene_Filtered_Methylation_data %>%
-  mutate(
-    Effect_size = as.numeric(Effect_size),
-    SE = as.numeric(SE))
