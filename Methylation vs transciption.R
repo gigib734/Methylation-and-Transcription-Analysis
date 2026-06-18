@@ -287,3 +287,6 @@ ggplot(PCDH_island_mean_thing, aes(x = methylation_mean, y = Effect)) +
     x = "Methylation Mean",
     y = "Transcription Effect"
   )
+
+
+# i will just go up and abel on the island stuff
