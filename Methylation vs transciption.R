@@ -1,7 +1,7 @@
 methylation_data <- read.csv("C:/Users/gbloc/OneDrive/Desktop/PCDHG_Gila/Coding/Methylation & Transcription Correlation/Meta-analysis results DMPs blood PCDH genes - Meta-analysis results DMPs blood PCDH genes (1).csv")
 transcription_data <- read.csv("C:/Users/gbloc/OneDrive/Desktop/PCDHG_Gila/Coding/Methylation & Transcription Correlation/Meta-analysis results DEGs blood PCDH genes - Meta-analysis results DEGs blood PCDH genes.csv.csv")
 Filtered_methylation_data <- methylation_data %>%
-  select(CpG, Annotated_genes, chr_state, Effect_size, SE)
+  select(CpG, Annotated_genes, chr_state, Effect_size, SE, CGI_position)
 library(dplyr)
 library(tidyverse)
 library(readr)
@@ -92,15 +92,15 @@ ggplot(plot_weighted_data, aes(x = weighted_mean, y = Effect)) +
   )
 #Filtering of Methylation data only using TSS regions and island and island shores
 
-Region_filtered_data <- methylation_data %>%
+Island_Filtered_methylation_data <- methylation_data %>%
   filter(str_detect(chr_state,"(?i)TSS"))
 head(Region_filtered_data)
-nrow(Region_filtered_data)
+nrow(Island_Filtered_methylation_data)
 
 Island_sun$Effect_size <- as.numeric(Island_sun$Effect_size)
-str(Island_sun$Effect_size)
+str(IIsland_Filtered_methylation_datastr(Island_sun$Effect_size)
 
-Island_sun <- Region_filtered_data %>%
+Island_sun <- Island_Filtered_methylation_data %>%
   filter(CGI_position %in% c("Island", "N_Shore", "S_Shore"))
 nrow(Island_sun)
 
@@ -140,6 +140,30 @@ cor.test(island_1$methylation_mean, island_1$Effect, method = "spearman")
 ggplot(island_1, aes(x = methylation_mean, y = Effect)) +
   geom_point(size = 3, color = "steelblue", alpha = 0.6) +
   geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "Island TSS Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
+
+ggplot(island_1, aes(x = methylation_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  geom_text(
+    aes(label = ifelse(
+      Annotated_genes %in% c(
+        "PCDHGA1",
+        "PCDHGA2",
+        "PCDHGA3",
+        "PCDHGA4",
+        "PCDHGB1"
+      ),
+      Annotated_genes,
+      ""
+    )),
+    vjust = -0.5
+  ) +
   theme_minimal() +
   labs(
     title = "Island TSS Methylation Mean vs Transcription Effect",
@@ -254,7 +278,7 @@ Island_pcdh_mean <- Island_sun_pcdh %>%
 PCDH_island_mean_thing <- inner_join(Island_pcdh_mean, transcription_data, by = "Annotated_genes")
 cor.test(PCDH_island_mean_thing$methylation_mean, PCDH_island_mean_thing$Effect, method = "spearman")
 
-ggplot(PCDH_mean, aes(x = methylation_mean, y = Effect)) +
+ggplot(PCDH_island_mean_thing, aes(x = methylation_mean, y = Effect)) +
   geom_point(size = 3, color = "steelblue", alpha = 0.6) +
   geom_smooth(method = "lm") +
   theme_minimal() +
