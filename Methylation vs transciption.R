@@ -251,3 +251,15 @@ Island_pcdh_mean <- Island_sun_pcdh %>%
     .groups = 'drop'
   )
 
+PCDH_island_mean_thing <- inner_join(Island_pcdh_mean, transcription_data, by = "Annotated_genes")
+cor.test(PCDH_island_mean_thing$methylation_mean, PCDH_island_mean_thing$Effect, method = "spearman")
+
+ggplot(PCDH_mean, aes(x = methylation_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "PCDHG Target Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
