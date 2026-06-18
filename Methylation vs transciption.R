@@ -165,3 +165,27 @@ ggplot(island_2, aes(x = methylation_mean, y = Effect)) +
 
 unique(methylation_data$CGI_position)
 unique(methylation_data$chr_state)
+
+#mean and weighted mean when just filtering for pcdg target genes
+
+PCDH_target <- Filtered_methylation_data %>%
+  filter(Annotated_genes %in% c("PCDHGA1","PCDHGA2","PCDHGA3","PCDHGA4","PCDHGB1"))
+nrow(PCDH_target)
+test1 <- PCDH_target %>%
+  filter(Annotated_genes %in% c("island", "N_shore", "S_shore"))
+cat("Rows with island/N_shore/S_shore:", nrow(test1), "\n")
+
+
+Mean_gene_effect <- Gene_Filtered_Methylation_data %>%
+  group_by(Annotated_genes) %>%
+  summarise(
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    methylation_median = median(Effect_size, na.rm = TRUE),
+    n_CpG = n(),
+    Mean_Effect_Size = mean(Effect_size, na.rm = TRUE),
+  )
+
+Gene_Filtered_Methylation_data <- Gene_Filtered_Methylation_data %>%
+  mutate(
+    Effect_size = as.numeric(Effect_size),
+    SE = as.numeric(SE))
