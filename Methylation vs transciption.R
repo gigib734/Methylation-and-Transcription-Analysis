@@ -132,5 +132,36 @@ Island_weighted_mean <- Island_sun %>%
   ) %>%
   arrange(desc(abs(weighted_mean)))
 
+
+island_1 <- inner_join(Island_mean, transcription_data, by = "Annotated_genes")
+cor.test(island_1$methylation_mean, island_1$Effect, method = "spearman")
+
+#plot the unweighted island meth vs trans
+ggplot(island_1, aes(x = methylation_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "Island TSS Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
+
+
+#plot the weightedmmeth vs trans fr island and ts filter
+island_2 <- inner_join(Island_weighted_mean, transcription_data, by = "Annotated_genes")
+cor.test(island_2$weighted_mean, island_2$Effect, method = "spearman")
+
+
+ggplot(island_2, aes(x = methylation_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "Island TSS Weighted Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
+
 unique(methylation_data$CGI_position)
 unique(methylation_data$chr_state)
