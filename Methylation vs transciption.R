@@ -86,11 +86,22 @@ ggplot(plot_weighted_data, aes(x = weighted_mean, y = Effect)) +
   geom_smooth(method = "lm") +
   theme_minimal() +
   labs(
-    title = "Weighted_ethylation Mean vs Transcription Effect",
+    title = "Weighted_Methylation Mean vs Transcription Effect",
     x = "Methylation Mean",
     y = "Transcription Effect"
   )
 #Filtering of Methylation data only using TSS regions and island and island shores
 
-Region_filtered
+Region_filtered_data <- methylation_data %>%
+  filter(str_detect(chr_state,"(?i)TSS"))
+head(Region_filtered_data)
+nrow(Region_filtered_data)
 
+# Check what values actually exist
+unique(methylation_data$CGI_position)
+unique(methylation_data$chr_state)
+
+
+
+unique(methylation_data$CGI_position)
+unique(methylation_data$chr_state)
