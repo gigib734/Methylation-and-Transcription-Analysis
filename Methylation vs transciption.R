@@ -97,9 +97,9 @@ Region_filtered_data <- methylation_data %>%
 head(Region_filtered_data)
 nrow(Region_filtered_data)
 
-# Check what values actually exist
-unique(methylation_data$CGI_position)
-unique(methylation_data$chr_state)
+Island_sun <- Region_filtered_data %>%
+  filter(CGI_position %in% c("Island", "N_Shore", "S_Shore"))
+nrow(Island_sun)
 
 
 
