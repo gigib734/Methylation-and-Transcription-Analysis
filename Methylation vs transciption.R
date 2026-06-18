@@ -185,3 +185,15 @@ PCDH_by_gene <- PCDH_target %>%
     Mean_Effect_Size = mean(Effect_size, na.rm = TRUE),
   )
 
+PCDH_mean <- inner_join(PCDH_by_gene, transcription_data, by = "Annotated_genes")
+cor.test(PCDH_mean$methylation_mean, PCDH_mean$Effect, method = "spearman")
+
+ggplot(PCDH_mean, aes(x = methylation_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "PCDHG Target Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
