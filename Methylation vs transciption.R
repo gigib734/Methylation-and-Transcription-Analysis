@@ -225,3 +225,22 @@ ggplot(PCDH_weighted_mean, aes(x = weighted_mean, y = Effect)) +
 
 
 #can i take my target genes an do the same filtering for TSS and island regions?
+
+Island_sun_pcdh <- Island_sun %>%
+  filter(Annotated_genes %in% c("PCDHGA1","PCDHGA2","PCDHGA3","PCDHGA4","PCDHGB1"))
+
+Island_sun <- Island_sun %>%
+  mutate(Effect_size = as.numeric(Effect_size))
+
+Island_sun <- Island_sun %>%
+  separate_rows(Annotated_genes, sep = ";") %>%
+  mutate(Annotated_genes = str_trim(Annotated_genes))
+
+
+Island_mean <- Island_sun %>%
+  group_by(Annotated_genes) %>%
+  summarise(
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    n_CpG = n(),
+    .groups = 'drop'
+  )
