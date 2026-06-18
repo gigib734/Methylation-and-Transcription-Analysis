@@ -197,3 +197,28 @@ ggplot(PCDH_mean, aes(x = methylation_mean, y = Effect)) +
     x = "Methylation Mean",
     y = "Transcription Effect"
   )
+
+PCDH_weighted <- PCDH_target %>%
+  filter(!is.na(SE) & SE > 0) %>%  # Remove invalid SE values
+  group_by(Annotated_genes) %>%
+  summarise(
+    n_CpG = n(),
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    weighted_mean = sum(Effect_size / SE^2, na.rm = TRUE) / sum(1 / SE^2, na.rm = TRUE),
+    se_weighted = 1 / sqrt(sum(1 / SE^2, na.rm = TRUE)),
+    .groups = 'drop'
+  ) %>%
+  arrange(desc(abs(weighted_mean)))
+
+PCDH_weighted_mean <- inner_join(PCDH_weighted, transcription_data, by = "Annotated_genes")
+cor.test(PCDH_weighted_mean$weighted_mean, PCDH_weighted_mean$Effect, method = "spearman")
+
+ggplot(PCDH_weighted_mean, aes(x = weighted_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "PCDHG Target Weighted Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
