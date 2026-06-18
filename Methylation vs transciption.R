@@ -222,3 +222,6 @@ ggplot(PCDH_weighted_mean, aes(x = weighted_mean, y = Effect)) +
     x = "Methylation Mean",
     y = "Transcription Effect"
   )
+
+
+#can i take my target genes an do the same filtering for TSS and island regions?
