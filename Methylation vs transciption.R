@@ -97,11 +97,40 @@ Region_filtered_data <- methylation_data %>%
 head(Region_filtered_data)
 nrow(Region_filtered_data)
 
+Island_sun$Effect_size <- as.numeric(Island_sun$Effect_size)
+str(Island_sun$Effect_size)
+
 Island_sun <- Region_filtered_data %>%
   filter(CGI_position %in% c("Island", "N_Shore", "S_Shore"))
 nrow(Island_sun)
 
+Island_sun <- Island_sun %>%
+  mutate(Effect_size = as.numeric(Effect_size))
 
+Island_sun <- Island_sun %>%
+  separate_rows(Annotated_genes, sep = ";") %>%
+  mutate(Annotated_genes = str_trim(Annotated_genes))
+
+
+Island_mean <- Island_sun %>%
+  group_by(Annotated_genes) %>%
+  summarise(
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    n_CpG = n(),
+    .groups = 'drop'
+  )
+
+Island_weighted_mean <- Island_sun %>%
+  filter(!is.na(SE) & SE > 0) %>%  # Remove invalid SE values
+  group_by(Annotated_genes) %>%
+  summarise(
+    n_CpG = n(),
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    weighted_mean = sum(Effect_size / SE^2, na.rm = TRUE) / sum(1 / SE^2, na.rm = TRUE),
+    se_weighted = 1 / sqrt(sum(1 / SE^2, na.rm = TRUE)),
+    .groups = 'drop'
+  ) %>%
+  arrange(desc(abs(weighted_mean)))
 
 unique(methylation_data$CGI_position)
 unique(methylation_data$chr_state)
