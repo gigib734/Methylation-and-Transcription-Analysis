@@ -5,28 +5,92 @@ Filtered_methylation_data <- methylation_data %>%
 library(dplyr)
 library(tidyverse)
 library(readr)
+library(ggplot2)
 
-#Filtering of Methylation data to do it by gene
-
-str(Filtered_methylation_data)
 #separating annotated genes out
 Gene_Filtered_Methylation_data <- Filtered_methylation_data %>%
   separate_rows(Annotated_genes, sep = ";") %>%
   mutate(Annotated_genes = str_trim(Annotated_genes))
 
-#double check
-head(Gene_Filtered_Methylation_data)
+#Filtering by cpg region and chromatin state
+
+
 #meaneffectbygene
 Mean_gene_effect <- Gene_Filtered_Methylation_data %>%
   group_by(Annotated_genes) %>%
   summarise(
-    Gene = first(Annotated_genes),
-    N_CpGs = n(),
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    methylation_median = median(Effect_size, na.rm = TRUE),
+    n_CpG = n(),
     Mean_Effect_Size = mean(Effect_size, na.rm = TRUE),
-    
   )
 
+Gene_Filtered_Methylation_data <- Gene_Filtered_Methylation_data %>%
+  mutate(
+    Effect_size = as.numeric(Effect_size),
+    SE = as.numeric(SE))
 
-#Filtering of Methylation data only using TSS regions
+transcription_data<- transcription_data %>%
+  rename(Annotated_genes = MarkerName)
 
+dat <- inner_join(Mean_gene_effect, transcription_data, by = "Annotated_genes")
+cor.test(dat$methylation_mean, dat$Effect, method = "spearman")
+
+plot_data <- Mean_gene_effect %>%
+  rename(gene = Annotated_genes) %>%
+  inner_join(
+    transcription_data %>% rename(gene = Annotated_genes),
+    by = "gene"
+  ) %>%
+  select(gene, methylation_mean, Effect)
+  )
+
+head(plot_data)
+ggplot(plot_data, aes(x = methylation_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "Methylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
+
+#weighted mean based on SE
+Weighted_gene_effect <- Gene_Filtered_Methylation_data %>%
+  filter(!is.na(SE) & SE > 0) %>%  # Remove invalid SE values
+  group_by(Annotated_genes) %>%
+  summarise(
+    n_CpG = n(),
+    methylation_mean = mean(Effect_size, na.rm = TRUE),
+    weighted_mean = sum(Effect_size / SE^2, na.rm = TRUE) / sum(1 / SE^2, na.rm = TRUE),
+    se_weighted = 1 / sqrt(sum(1 / SE^2, na.rm = TRUE)),
+    .groups = 'drop'
+  ) %>%
+  arrange(desc(abs(weighted_mean)))
+
+Hm <- inner_join(Weighted_gene_effect, transcription_data, by = "Annotated_genes")
+cor.test(Hm$weighted_mean, dat$Effect, method = "spearman")
+
+plot_weighted_data <- Weighted_gene_effect %>%
+  rename(gene = Annotated_genes) %>%
+  inner_join(
+    transcription_data %>% rename(gene = Annotated_genes),
+    by = "gene"
+  ) %>%
+  select(gene, weighted_mean, Effect)
+
+
+ggplot(plot_weighted_data, aes(x = weighted_mean, y = Effect)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "Weighted_ethylation Mean vs Transcription Effect",
+    x = "Methylation Mean",
+    y = "Transcription Effect"
+  )
+#Filtering of Methylation data only using TSS regions and island and island shores
+
+Region_filtered
 
